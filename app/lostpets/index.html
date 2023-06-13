@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOS MyPet</title>
+    <link rel="stylesheet" href="../../src/CSS/base.css">
+    <style>
+        /* CONTENT */
+        .list_container {
+            display: grid;
+            grid-template-columns: repeat( auto-fit, minmax(300px, 1fr) );
+            gap: 2em;
+            padding-top: 20px;
+            position: relative;
+            justify-content: center;
+            /* padding-bottom: 20px; */
+
+            min-height: calc(100vh - 15em);
+        }
+
+        .pet_card {
+            position: relative;
+            width: 100%;
+            height: 30em;
+            border-radius: 15px;
+            /* overflow: hidden; */
+            cursor: pointer;
+            background-size: cover;
+            /* background-color: red; */
+            box-shadow: 0px 0px 5px 1px rgba(0, 0, 0, 0.2);
+
+        }
+
+        .pet_card::before {
+            content: '';
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+
+            position: absolute;
+            background: linear-gradient(transparent, black);
+        }
+
+        .pet_info {
+            color: white;
+            font-size: 2em;
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            text-decoration: none;
+        }
+
+        .add-btn {
+            position: fixed;
+            bottom: 30px;
+            padding: 10px 30px;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 2em;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 500;
+            margin: auto;
+            width: max-content;
+            /* left: 20px; */
+            outline: 2px solid var(--secondary-color);
+            right: 50px;
+        }
+
+        .deleteBtn {
+            position: absolute;
+            right: 0px;
+            top: -10px;
+            width: 35px;
+            height: 35px;
+            background-color: #ef4d21;
+            color: white;
+            border-radius: 50%;
+            border: none;
+            font-size: 2em;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" v-cloak>
+
+        <mypetsos-wrapper title="Mascotas perdidas" route="lostPets">
+            <div class="list_container">
+                <a :href="`../lostPetsForm/?pet=${pet.id}`" :style="`background-image: url(${baseURL}${pet.imagePath});`" v-for="pet in lostPets" class="pet_card">
+                    <div class="pet_info">
+                        <h3>{{pet.name}}</h3>
+                        <p>{{pet.petBreed.name}}</p>
+                    </div>
+                    <button v-if="datos.curp == pet.user.curp" class="deleteBtn">x</button>
+                </a>
+
+                <a class="add-btn" href="../lostPetsForm/index.html">Subir publicación</a>
+            </div>
+        </mypetsos-wrapper>
+    </div>
+
+    <script src="../../src/JS/chart.js"></script>
+    <script src="../../src/JS/axios.min.js"></script>
+    <script src="../../src/JS/Vue.js"></script>
+    <script type="module" src="../../Template/wrapper.js"></script>
+    <script>
+        // axios.defaults.baseURL = 'http://192.168.1.121:8080';
+        const { createApp } = Vue
+
+        createApp({
+            data() {
+                return {
+                    datos: JSON.parse(window.localStorage.getItem('usuario')),
+                    lostPets: [],
+                    baseURL: "http://192.168.1.121:8080"
+                }
+            },
+            methods: {
+                async getLostPets() {
+                    axios.defaults.baseURL = "http://192.168.1.121:8080/api";
+                    axios.defaults.headers.common["Authorization"] = this.datos.token;
+
+                    let {data = []} = await axios({
+                        method: "get",
+                        url: "/lostPets",
+                        headers: {
+                            Authorization: `${this.datos.token}`
+                        }
+                    })
+
+                    this.lostPets = data;
+                    console.log(data);
+                }
+
+            },
+            async mounted() {
+                let wrapper = document.querySelector("mypetsos-wrapper");
+                await this.getLostPets();
+
+                wrapper.loading = false;
+            }
+        }).mount('#app')
+
+
+
+
+    </script>
+</body>
+
+</html>

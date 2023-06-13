@@ -43,14 +43,45 @@
         <div class="form_container">
             <div class="form">
                 <div>
-                    <h2>Iniciar sesión</h2>
-                    <p>En busqueda de tu nuevo amigo de cuatro patas</p>
+                    <h2>Crear cuenta</h2>
+                    <p>Crea una cuenta para mejorar la experiencia dentro de MyPet SOS.</p>
                 </div>
 
+                <p id="createAccount">¿Ya tienes cuenta? <a href="./">Iniciar sesión</a></p>
+
                 <form class="inputs_container" onsubmit="signIn(event)" action="">
+                    <div class="profile_photo_container">
+                        <label class="profile_photo" for="file">
+                            <input onchange="onChangeImage(event)" accept="image/*"  id="file" name="file" type="file">
+                        </label>
+                    </div>
+                    <div class="input_text">
+                        <label for="name">Nombre(s)</label>
+                        <input title="name" autocomplete="no" placeholder="Ej. Keyla Arleth" type="text" name="name"
+                            id="name" required>
+                    </div>
+
+                    <div class="input_text">
+                        <label for="surname">Apllidos</label>
+                        <input title="surname" autocomplete="no" placeholder="Ej. Santamaría López" type="text" name="surname"
+                            id="surname" required>
+                    </div>
+
+                    <div class="input_text">
+                        <label for="curp">CURP</label>
+                        <input title="curp" pattern="^[A-Z]{1}[AEIOU]{1}[A-Z]{2}[0-9]{2}(0[1-9]|1[0-2])(0[1-9]|1[0-9]|2[0-9]|3[0-1])[HM]{1}(AS|BC|BS|CC|CS|CH|CL|CM|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS|NE)[B-DF-HJ-NP-TV-Z]{3}[0-9A-Z]{1}[0-9]{1}$" autocomplete="no" placeholder="Ej. SALK041206MBSNPYE3" type="text" name="curp"
+                            id="curp" required>
+                    </div>
+
+                    <div class="input_text">
+                        <label for="phone">Número teléfonico</label>
+                        <input title="phone" autocomplete="no" placeholder="Ej. 6121231212" type="text" name="phone"
+                            id="phone" required>
+                    </div>
+
                     <div class="input_text">
                         <label for="email">Correo electrónico</label>
-                        <input title="correo" autocomplete="no" placeholder="luis@example.com" type="email" name="email"
+                        <input title="correo" autocomplete="no" placeholder="Ej. luis@example.com" type="email" name="email"
                             id="email" required>
                     </div>
 
@@ -61,11 +92,10 @@
                     </div>
 
                     <div class="submit_container">
-                        <input id="btn_submit" class="" type="submit" value="Iniciar sesión">
+                        <input id="btn_submit" class="" type="submit" value="Crear cuenta">
                     </div>
                 </form>
 
-                <p id="createAccount">¿No estás registrado? <a href="./signUp.html">Crear Cuenta</a></p>
             </div>
         </div>
     </div>
@@ -85,33 +115,44 @@
             submit_container.classList.add("loading");
 
             let data = new FormData();
+
+            let image = document.getElementById("file");
+            let name = document.getElementById("name");
+            let surname = document.getElementById("surname");
+            let curp = document.getElementById("curp");
+            let phone = document.getElementById("phone");
             let email = document.getElementById("email");
             let pswd = document.getElementById("password");
 
+            data.append("image", image.files[0]);
+            data.append("name", name.value);
+            data.append("surname", surname.value);
+            data.append("curp", curp.value);
+            data.append("phone", phone.value)
             data.append("email", email.value);
             data.append("password", pswd.value);
 
             setTimeout(() => {
                 axios({
                     method: "POST",
-                    url: `${BASE_URL}/signin`,
+                    url: `${BASE_URL}/signup`,
                     data: data
-                }).then(({ data }) => {
+                }).then(({data}) => {
                     console.log(JSON.stringify(data));
-                    window.localStorage.setItem("usuario", JSON.stringify(data))
+                    window.localStorage.setItem("usuario",JSON.stringify(data))
 
                     Swal.fire({
                         icon: 'success',
-                        title: "¡Sesión iniciada!",
+                        title: "¡Cuenta registrada!",
                         showConfirmButton: true,
                         timer: 1500
                     }).then(() => {
                         window.location = "/app/statistics"
                     })
-
+    
                     submit_container.classList.remove("loading");
                     e.submitter.disabled = false;
-                }).catch(({ response: res = [] }) => {
+                }).catch(({ response: res = null }) => {
                     if (res) {
                         let { data } = res;
 
@@ -134,11 +175,19 @@
                         showConfirmButton: true
                     })
                     submit_container.classList.remove("loading");
-                    e.submitter.disabled = false;
-
+                    e.submitter.disabled = false;                    
                 })
 
             }, 1500)
+        }
+
+        function onChangeImage(evt) {
+            const [file] = evt.target.files;
+
+            if(file) {
+                let label = document.querySelector(".profile_photo");
+                label.style.backgroundImage = `url(${URL.createObjectURL(file)})`;
+            }
         }
     </script>
 </body>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOS MyPet</title>
+    <link rel="stylesheet" href="../../src/CSS/base.css">
+    <link rel="stylesheet" href="../../src/CSS/inputs.css">
+    <style>
+        .container {
+            margin-top: 20px;
+            display: flex;
+            height: 100%;
+        }
+
+        iframe {
+            border-radius: 15px;
+            box-shadow: 0px 0px 5px 1px rgba(0, 0, 0, 0.2);
+            margin-left: 10px;
+        }
+
+        .right_side {
+            width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .right_side>* {
+            width: 80%;
+        }
+
+        .search {
+            font-size: 1.8em;
+            font-weight: 600;
+            padding: 10px 10px;
+            border-radius: 8px;
+            border: 2px solid var(--primary-color);
+            /* height: 2em; */
+        }
+
+        .veterinary {
+            display: flex;
+            gap: 10px;
+
+            background-color: transparent;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 2px solid rgba(85, 74, 39, 0.25);
+
+            transition: all ease 0.25s;
+        }
+
+        .veterinary:hover {
+            background-color: rgba(0, 0, 0, 0.07);
+
+            border: 2px solid var(--primary-color);
+
+        }
+
+        .veterinary img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+
+        .veterinary_list {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow: auto;
+        }
+
+        .veterinary_info {
+            font-size: 1.5em;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .veterinary_name {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .veterinary_phone {
+            display: flex;
+            font-size: 1.3em;
+            font-weight: 600;
+            gap: 10px;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id="app" v-cloak>
+
+        <mypetsos-wrapper title="Veterinarias" route="veterinary">
+            <div class="container">
+                <iframe
+                    :src="veterinary[currentIndex].url"
+                    width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"></iframe>
+
+                <div class="right_side">
+                    <div class="input_text">
+                        <!-- <label for="email">Correo electrónico</label> -->
+                        <input @input="onInput" title="search" autocomplete="no" placeholder="Buscar veterinaria" type="text"
+                            name="search" id="search" required>
+                    </div>
+                    <div class="veterinary_list">
+
+                        <div v-for="(i, index) in filterVeterinary()" :data-index="index" @click="changeCurrentIndex" class="veterinary">
+                            <img :src="`../../src/img/${i.image}`" alt="">
+                            <div class="veterinary_info">
+                                <p class="veterinary_name">{{i.name}}</p>
+                                <div class="veterinary_phone">
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="1em"
+                                        viewBox="0 0 512 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+                                        <path
+                                            d="M164.9 24.6c-7.7-18.6-28-28.5-47.4-23.2l-88 24C12.1 30.2 0 46 0 64C0 311.4 200.6 512 448 512c18 0 33.8-12.1 38.6-29.5l24-88c5.3-19.4-4.6-39.7-23.2-47.4l-96-40c-16.3-6.8-35.2-2.1-46.3 11.6L304.7 368C234.3 334.7 177.3 277.7 144 207.3L193.3 167c13.7-11.2 18.4-30 11.6-46.3l-40-96z" />
+                                    </svg>
+                                    <p>{{i.phone}}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </mypetsos-wrapper>
+    </div>
+
+    <script src="../../src/JS/chart.js"></script>
+    <script src="../../src/JS/axios.min.js"></script>
+    <script src="../../src/JS/Vue.js"></script>
+    <script type="module" src="../../Template/wrapper.js"></script>
+    <script>
+        // axios.defaults.baseURL = 'http://192.168.1.121:8080';
+        const { createApp } = Vue
+
+        createApp({
+            data() {
+                return {
+                    datos: JSON.parse(window.localStorage.getItem('usuario')),
+                    filter: "",
+                    veterinary: [
+                        {
+                            name: "Bayliss Veterinaria",
+                            phone: "612 123 4567",
+                            image: "bayliss.jpg",
+                            url: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3641.964029540961!2d-110.33367170000001!3d24.102760399999998!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x86afd34580a38063%3A0xe5f3db874f10f641!2sBayliss%20Veterinaria%20villas!5e0!3m2!1ses-419!2smx!4v1686678719555!5m2!1ses-419!2smx"
+                        },
+                        {
+                            name: "Ani-Malitos",
+                            phone: "612 136 5163",
+                            image: "animalitos.png",
+                            url: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3642.0261454292913!2d-110.328966!3d24.100576!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x86afd2cca52e4bcb%3A0x457c3532bcd29bd0!2sAni-Malitos!5e0!3m2!1ses-419!2smx!4v1686682430750!5m2!1ses-419!2smx"
+                        },
+                        {
+                            name: "La Perruqueria Santa fe",
+                            phone: "612 104 1919",
+                            image: "santafe.jpg",
+                            url: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14568.693375336108!2d-110.3278402!3d24.0953988!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x86afd2ca7cd0f709%3A0x85a2c52ffadd9004!2sLa%20Perruqueria%20Santa%20fe!5e0!3m2!1ses-419!2smx!4v1686682750448!5m2!1ses-419!2smx"
+                        },
+                        {
+                            name: "Animal Clinic.",
+                            phone: "612 104 4379",
+                            image: "clinic.jpg",
+                            url: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3642.1542590773906!2d-110.3195209!3d24.0960701!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x86afd2c803064dfb%3A0xaf0e37199cf9e75c!2sAnimal%20Clinic.!5e0!3m2!1ses-419!2smx!4v1686683191590!5m2!1ses-419!2smx"
+                        }
+                    ],
+                    currentIndex: 0,
+                    baseURL: "http://192.168.1.121:8080"
+                }
+            },
+            methods: {
+                changeCurrentIndex(e) {
+                    this.currentIndex = e.currentTarget.dataset.index
+                },
+                onInput(e) {
+                    this.filter = e.target.value.toLowerCase();
+                },
+                filterVeterinary() {
+                    return this.filter ? this.veterinary.filter(e => e.name.trim().toLowerCase().includes(this.filter.trim())) : this.veterinary;
+                }
+            },
+            async mounted() {
+                let wrapper = document.querySelector("mypetsos-wrapper");
+
+
+                wrapper.loading = false;
+            }
+        }).mount('#app')
+
+
+
+
+    </script>
+</body>
+
+</html>

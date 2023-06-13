@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOS MyPet</title>
+    <link rel="stylesheet" href="../../src/CSS/base.css">
+    <link rel="stylesheet" href="../../src/CSS/inputs.css">
+    <style>
+        .lostpet-form {
+            display: flex;
+            width: 100%;
+            height: 100%;
+
+            padding-top: 20px;
+        }
+
+        .pet_preview_container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .lostpet-form>* {
+            width: 55em;
+        }
+
+        .image_dog {
+            position: relative;
+            width: 100%;
+            height: 80%;
+            background-color: #D9D9D9;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            background-size: cover;
+        }
+
+        .image_dog:before {
+            position: absolute;
+            content: '+';
+            width: .8em;
+            height: .8em;
+            display: flex;
+            font-size: 10em;
+            justify-content: center;
+            align-items: center;
+            color: var(--secondary-color);
+            bottom: -.5em;
+            border-radius: 50%;
+
+
+
+            background-color: #1F1F1F;
+            border: 10px solid white;
+        }
+
+        .image_dog input {
+            display: none;
+        }
+
+        .confirm-btn {
+            background-color: #6353DF;
+            height: 2.3em;
+
+            border: none;
+            color: white;
+            font-size: 2em;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        .title_form {
+            font-size: 4em;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .form-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .form {
+            width: 80%;
+            background-color: #ececec;
+            padding: 5em;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            height: min-content;
+            padding-top: 2.5em;
+            border-radius: 20px;
+            border: 25px solid var(--primary-color);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" v-cloak>
+
+        <mypetsos-wrapper title="Reportar mascota" route="lostPets">
+            <form class="lostpet-form" @submit="submitLostPetInfo">
+                <div class="pet_preview_container">
+                    <label class="image_dog">
+                        <input :disabled="!editable" @change="onChangeImage" type="file" name="image" id="image">
+                    </label>
+
+                    <div class="submit_container">
+                        <input class="confirm-btn" type="submit" value="Confirmar" :disabled="!editable">
+                    </div>
+                </div>
+
+                <div class="form-container">
+                    <div class="form">
+                        <h2 class="title_form">Información</h2>
+                        <div class="input_text">
+                            <label for="name">Nombre</label>
+                            <input :disabled="!editable" title="name" autocomplete="no" placeholder="Ej. Juan"
+                                type="text" name="name" id="name" required>
+                        </div>
+
+                        <div class="input_text">
+                            <label for="sex">Sexo</label>
+                            <select :disabled="!editable"  name="sex" id="sex">
+                                <option value="" selected disabled>Seleccione una opcion</option>
+                                <option v-for="sex in sex" :value="sex.id">{{sex.name}}</option>
+                            </select>
+                        </div>
+
+                        <div class="input_text">
+                            <label for="petBreed">Raza</label>
+                            <select :disabled="!editable" name="petBreed" id="petBreed">
+                                <option value="" selected disabled>Seleccione una opcion</option>
+                                <option v-for="breed in petBreed" :value="breed.id">{{breed.name}}</option>
+
+                            </select>
+                        </div>
+
+                        <div class="input_text">
+                            <label for="size">Tamaño</label>
+                            <input :disabled="!editable" title="tamaño" autocomplete="no" placeholder="Ej. Grande"
+                                type="text" name="size" id="size" required>
+                        </div>
+
+                        <div class="input_text">
+                            <label for="">Edad</label>
+                            <input :disabled="!editable" autocomplete="no" placeholder="Ingrese la edad" type="number"
+                                name="age" id="age" required>
+                        </div>
+
+                        <div class="input_text">
+                            <label for="descripcion">Descripción</label>
+                            <textarea :disabled="!editable" style="resize: none;"
+                                placeholder="Puedes empezar dando detalles sobre la apariencia de tu mascota"
+                                name="descripcion" id="descripcion" cols="30" rows="4"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        </mypetsos-wrapper>
+    </div>
+
+    <script src="../../src/JS/chart.js"></script>
+    <script src="../../src/JS/axios.min.js"></script>
+    <script src="../../src/JS/sweetalert.js"></script>
+    <script src="../../src/JS/Vue.js"></script>
+    <script type="module" src="../../Template/wrapper.js"></script>
+    <script>
+        // axios.defaults.baseURL = 'http://192.168.1.121:8080';
+        const { createApp } = Vue
+
+        createApp({
+            data() {
+                return {
+                    datos: JSON.parse(window.localStorage.getItem('usuario')),
+                    baseURL: "http://192.168.1.121:8080",
+                    sex: [],
+                    petBreed: [],
+                    files: [],
+                    editable: true,
+                    pet: [],
+                }
+            },
+            methods: {
+                onChangeImage(event) {
+                    let [files] = event.target.files;
+
+                    if (files) {
+                        let preview = document.querySelector(".image_dog");
+                        this.files = files;
+                        preview.style.backgroundImage = `url(${URL.createObjectURL(files)})`;
+                    }
+                },
+
+                async getSexInfo() {
+                    let { data: res = [] } = await axios({
+                        method: "GET",
+                        url: "/petBreed"
+                    })
+                    this.petBreed = res;
+                },
+
+                async getPetBreedInfo() {
+                    let { data: res = [] } = await axios({
+                        method: "GET",
+                        url: "/sex"
+                    })
+
+                    this.sex = res
+                },
+
+                async checkLostPetInfo() {
+                    let query = window.location.search;
+
+                    const urlparams = new URLSearchParams(query);
+                    const pet = urlparams.get('pet');
+
+                    if (pet) {
+                        let { data: res = [] } = await axios({
+                            method: "GET",
+                            url: `/lostPets/${pet}`
+                        })
+
+                        console.log(res);
+                        console.log(this.datos.curp)
+
+                        if (res.user.curp != this.datos.curp) {
+                            this.editable = false;
+                        }
+
+                        this.pet = res;
+
+                        let preview = document.querySelector(".image_dog");
+                        let name = document.getElementById("name");
+                        let sex = document.getElementById("sex");
+                        let petBreed = document.getElementById("petBreed");
+                        let size = document.getElementById("size");
+                        let age = document.getElementById("age");
+                        let description = document.getElementById("descripcion");
+
+                        preview.style.backgroundImage = `url(${this.baseURL}${res.imagePath})`;
+                        name.value = res.name;
+                        sex.value = res.sex.id;
+                        petBreed.value = res.petBreed.id;
+                        size.value = res.size;
+                        age.value = res.age;
+                        description.value = res.description;
+                    }
+                },
+
+                async submitLostPetInfo(e) {
+                    const submit_container = document.querySelector(".submit_container");
+                    e.preventDefault();
+                    let image = document.getElementById("image");
+                    let name = document.getElementById("name");
+                    let sex = document.getElementById("sex");
+                    let petBreed = document.getElementById("petBreed");
+                    let size = document.getElementById("size");
+                    let age = document.getElementById("age");
+                    let description = document.getElementById("descripcion");
+
+                    let data = new FormData();
+                    data.append("name", name.value);
+                    data.append("id_sex", sex.value);
+                    data.append("id_petBreed", petBreed.value);
+                    data.append("size", size.value);
+                    data.append("age", age.value);
+                    data.append("description", description.value);
+                    data.append("image", image.files[0])
+
+                    submit_container.classList.add("loading");
+                    e.submitter.disabled = true
+                    let res = axios({
+                        method: this.pet ? "put" : "post",
+                        url: this.pet ? `/lostPets/${this.pet.id}` : "/lostPets",
+                        data: data
+                    }).then(({ data }) => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: "Publicación de la mascota añadida",
+                            showConfirmButton: true
+                        }).then(() => window.location.href = "../lostpets")
+                    })
+                        .catch(({ response: res = null }) => {
+                            if (res) {
+                                let { data } = res;
+
+                                console.log(data);
+
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: data.textError,
+                                    showConfirmButton: true
+                                })
+                                submit_container.classList.remove("loading");
+                                e.submitter.disabled = false;
+
+                                return;
+                            }
+
+                            Swal.fire({
+                                icon: 'error',
+                                title: "Ocurrio un error con el servidor. Verifica tu conexión y que el tamaño de la imagen sea menor a 5mb",
+                                showConfirmButton: true
+                            })
+                            submit_container.classList.remove("loading");
+                            e.submitter.disabled = false;
+                        })
+                }
+            },
+            async mounted() {
+                axios.defaults.baseURL = "http://192.168.1.121:8080/api";
+                axios.defaults.headers.common["Authorization"] = this.datos.token;
+
+                let wrapper = document.querySelector("mypetsos-wrapper");
+                await this.getSexInfo();
+                await this.getPetBreedInfo();
+                this.checkLostPetInfo();
+                wrapper.loading = false;
+            }
+        }).mount('#app')
+
+
+
+
+    </script>
+</body>
+
+</html>

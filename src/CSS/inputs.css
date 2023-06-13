@@ -1,0 +1,157 @@
+.input_text {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: .8em;
+    /* background-color: red; */
+}
+
+.input_text label {
+    font-size: 1.7em;
+    font-weight: 600;
+    color: var(--primary-color);
+    /* margin-bottom: 5px; */
+}
+
+.input_text input[type="text"], .input_text input[type="password"],
+.input_text input[type="email"], .input_text textarea, select, .input_text input[type="number"] {
+    font-size: 1.8em;
+    height: 2.2em;
+    padding: 20px;
+
+    font-family: 'Montserrat';
+    font-weight: 600;
+    border-radius: 5px;
+
+    outline: 0px solid rgba(85, 74, 39, .44);
+    border: 3px solid rgba(0, 0, 0, 0.35);
+    transition: outline ease 0.09s, border ease 0.15s;
+}
+
+.input_text textarea {
+    height: unset;
+}
+
+.input_text input[type="text"]:hover, .input_text input[type="password"]:hover,
+.input_text input[type="email"]:hover, .input_text textarea:hover, select:hover, .input_text input[type="number"]:hover {
+    /* outline: 2px solid rgba(85, 74, 39, .44); */
+    border: 3px solid var(--primary-color);
+}
+
+.input_text input[type="text"]:focus, .input_text input[type="password"]:focus, .input_text input[type="number"]:focus
+.input_text input[type="email"]:focus, .input_text textarea:focus, select:focus {
+    border: 3px solid var(--primary-color);
+    outline: 3px solid rgba(85, 74, 39, .44);
+}
+
+select {
+    padding: 0 20px;
+    color: #877575;
+}
+
+
+
+input[type="submit"] {
+    background-color: var(--primary-color);
+    border: none;
+    color: var(--secondary-color);
+    font-size: 2.2em;
+    font-family: 'Montserrat';
+    font-weight: 600;
+    padding: 0.5em;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    /* outline: 1px solid red; */
+
+    transition: all ease 0.25s;
+}
+
+input[type="submit"]:hover {
+    filter: contrast(1.3);
+}
+
+.submit_container {
+    position: relative;
+
+    display: flex;
+    /* justify-content: center; */
+    /* align-items: center; */
+}
+
+.submit_container::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: var(--primary-color);
+    border-radius: 5px;
+
+    /* DATOS QUE CAMBIARAN CON LA OPACIDAD */
+    opacity: 0;
+    visibility: hidden;
+    
+    top: 0;
+    left: 0;
+
+    transition: opacity 0.25s ease, visibility 0.25s 0.25s ease;
+} 
+
+.submit_container.loading input[type="submit"] {
+    color: var(--primary-color);
+}
+
+.submit_container.loading::before {
+    opacity: 1;
+    visibility: visible;
+
+    user-select: none;
+    transition: opacity 0.25s ease;
+}
+
+.submit_container::after {
+    content: '';
+    position: absolute;
+    width: 2.5em;
+    height: 2.5em;
+    top: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    border: 3px solid white;
+    border-radius: 50%;
+    border-top: 3px solid transparent;
+    
+    /* DATOS QUE CAMBIARAN CON LA OPACIDAD */
+    opacity: 0;
+    bottom: -200%;
+    visibility: hidden;
+
+    animation-name: loading;
+    animation-duration: 1s;
+    animation-timing-function: linear;
+    animation-fill-mode: backwards;
+    animation-iteration-count: infinite;
+
+    transition: all 0.25s ease;
+
+    transition: opacity 0.25s ease;
+}
+
+.submit_container.loading::after {
+    opacity: 1;
+    bottom: 0;
+    visibility: visible;
+
+    transition: opacity 0.25s ease, bottom 0.25s 0.25s ease;
+}
+
+@keyframes loading {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+

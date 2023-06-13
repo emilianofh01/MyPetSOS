@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOS MyPet</title>
+    <link rel="stylesheet" href="../../src/CSS/base.css">
+    <style>
+        /* CONTENT */
+        .middle_graphics>* {
+            width: calc(50% - 1em);
+        }
+
+        .graphic {
+            display: flex;
+            height: 500px;
+            justify-content: center;
+
+            padding: 20px;
+            border: 2px solid rgba(85, 74, 39, 0.5);
+            border-radius: 15px;
+        }
+
+        .graphic.petBreed_graphic {
+            width: min-content;
+        }
+
+        .graphic.adoption_graphic {
+            flex: 1;
+        }
+
+        .middle_graphics {
+            gap: 1em;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .counter_container {
+            width: 100%;
+            /* background-color: red; */
+            justify-content: space-between;
+            display: flex;
+
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+
+        .counter_container>* {
+            width: 50%;
+            /* background-color: blue; */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            flex-direction: column;
+
+        }
+
+        .counter_container>* p {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .counter_container p:last-child {
+            width: 100%;
+            text-align: center;
+            padding: 5px;
+            border-radius: 100px;
+            background-color: rgba(85, 74, 39, 1);
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+
+        <mypetsos-wrapper title="Estadísticas">
+            <div class="counter_container">
+                <div class="pet_adoption">
+                    <p>Número de animales en el albergue</p>
+                    <p id="albergue">5</p>
+                </div>
+    
+                <div class="pet_noAdoption">
+                    <p>Animales disponible para adopcion</p>
+                    <p id="adopcion">10</p>
+                </div>
+            </div>
+            <div class="graphic vaccine_graphic">
+                <canvas id="vaccines"></canvas>
+            </div>
+            <div class="middle_graphics" style="display: flex;">
+                <div class="graphic petBreed_graphic">
+                    <canvas id="petBreed"></canvas>
+                </div>
+                <div class="graphic adoption_graphic">
+                    <canvas id="adoption"></canvas>
+                </div>
+            </div>
+        </mypetsos-wrapper>
+    </div>
+
+    <script src="../../src/JS/axios.min.js"></script>
+    <script src="../../src/JS/chart.js"></script>
+    <script src="../../src/JS/Vue.js"></script>
+    <script type="module" src="../../Template/wrapper.js"></script>
+    <script>
+        axios.defaults.baseURL = 'http://192.168.1.121:8080';
+        const { createApp } = Vue
+
+        createApp({
+            data() {
+                return {
+                    petAdoption: 0,
+                    pet_noAdoption: 0,
+                    PetForAdoption: 0,
+                }
+            },
+            methods: {
+                async getPetForAdoption() {
+                    return await axios({
+                        method: "GET",
+                        url: "/api/PetForAdoption",
+                        headers: {
+                            Authorization: "Ztq55izYTy5wYvCf1qlyfTT9DYJpfp4Y2v0KwIEke2w="
+                        }
+                    })
+
+                },
+
+                getCounterInfo() {
+                    document.getElementById("albergue").innerHTML = this.pet_noAdoption;
+                    document.getElementById("adopcion").innerHTML = this.petAdoption;
+                },
+
+                getGraphicAdoptions(data) {
+                    const ctx = document.getElementById('adoption');
+
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre",
+                                "Noviembre", "Diciembre"],
+                            datasets: [{
+                                label: 'Cantidad de animales que fueron adoptados en cada mes del año',
+                                data: data,
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                },
+
+                petBreedGraphics(labels, data) {
+                    const ctx = document.getElementById('petBreed');
+
+                    new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Cantidad de animales que fueron adoptados en cada mes del año',
+                                data: data,
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                },
+
+                async getVaccines() {
+                    this.PetForAdoption = await this.getPetForAdoption();
+
+                    // Cuenta la cantidad de regisros 
+                    this.petAdoption = this.PetForAdoption.data.filter(e => e.vaccines.length).length;
+                    this.pet_noAdoption = this.PetForAdoption.data.length;
+                    this.getCounterInfo();
+
+                    // Registrso de meses
+                    let dates = [];
+                    let datesData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+                    const today = new Date();
+
+                    this.PetForAdoption.data.map(e => dates.push(new Date(e.dateRegister)))
+                    dates = dates.filter(e => e.getFullYear() == today.getFullYear()).map(e => datesData[e.getMonth()] += 1);
+                    this.getGraphicAdoptions(datesData);
+
+                    // Razas de animales en el albergue.
+                    let petBreed = {};
+                    this.PetForAdoption.data.map(e => {
+                        if (petBreed[e.petBreed.name]) {
+                            petBreed[e.petBreed.name] += 1;
+                        } else {
+                            petBreed[e.petBreed.name] = 1;
+                        }
+                    })
+                    this.petBreedGraphics(Object.keys(petBreed), Object.values(petBreed));
+
+                    // Vacunas mas aplicadas
+                    let labels = [];
+                    let data = [];
+                    let vaccines = {};
+                    const ctx = document.getElementById('vaccines');
+                    // console.log(PetForAdoption);
+                    this.PetForAdoption.data.map(e => e.vaccines.map(vaccine => {
+                        if (vaccines[vaccine.nombre]) {
+                            vaccines[vaccine.nombre] += 1;
+                        } else {
+                            vaccines[vaccine.nombre] = 1
+                        }
+                    }));
+
+                    labels = Object.keys(vaccines);
+                    data = Object.values(vaccines);
+
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Vacuna mas usadas',
+                                data: data,
+                                borderWidth: 1,
+                                backgroundColor: [
+                                    'rgba(255, 99, 132, 0.2)',
+                                    'rgba(255, 159, 64, 0.2)',
+                                    'rgba(255, 205, 86, 0.2)',
+                                    'rgba(75, 192, 192, 0.2)',
+                                    'rgba(54, 162, 235, 0.2)',
+                                    'rgba(153, 102, 255, 0.2)',
+                                    'rgba(201, 203, 207, 0.2)'
+                                ],
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                },
+            },
+            mounted() {
+                this.getVaccines();
+            }
+        }).mount('#app')
+
+
+
+
+    </script>
+</body>
+
+</html>

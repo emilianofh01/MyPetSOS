@@ -1,0 +1,163 @@
+.container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    
+}
+
+.banner_container {
+    display: flex;
+    padding: 5em 4em;
+
+    flex-direction: column;
+
+    justify-content: space-between;
+
+    position: relative;
+    /* width: 40%; */
+    max-width: 70.6em;
+    
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--primary-color);
+} 
+
+.banner_container h1 {
+
+    color: white;
+    font-size: 6em;
+    font-weight: 600;
+    word-spacing: .25em;
+    margin-bottom: 1em;
+}
+
+.presentation-banner {
+    display: flex;
+    flex-direction: column;
+}
+
+.banner_container img {
+    position: relative;
+    align-self: flex-end;
+    
+
+    right: -60px;
+    width: 38em;
+}
+
+.social-container {
+    display: flex;
+    justify-content: center;
+    gap: 5em;
+}
+
+.social-container svg {
+    width: 5.5em;
+    fill: var(--primary-color);
+    padding: 0.6em;
+    border-radius: 10px;
+    background-color: white;
+
+    aspect-ratio: 1/1;
+}
+
+.form_container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: #ECECEC;
+    font-size: 10px;
+}
+
+.form {
+    width: 80%;
+    height: 80%;
+    border-radius: 25px;
+    background-color: white;
+    padding: 50px 40px;
+    overflow: auto;
+
+    display: flex;
+    flex-direction: column;
+    gap: 3.5em;
+}
+
+.form h2 {
+    font-size: 3.5em;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.form p {
+    font-size: 2.25em;
+    font-weight: 400;
+}
+
+.inputs_container {
+    gap: 2em;
+    display: flex;
+    flex-direction: column;
+}
+
+.submit_container {
+    margin-top: 1em;
+
+}
+
+#createAccount {
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.7);
+    font-size: 2em;
+    text-align: center;
+}
+
+#createAccount a {
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.7);
+}
+
+/* SIGN UP FORM */
+
+.profile_photo_container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 2em;
+}
+
+.profile_photo {
+    position: relative;
+    width: 12em;
+    height: 12em;
+
+    border: 2px solid var(--primary-color);
+    border-radius: 50%;
+    /* background-image: url(../img/corgi.jpg); */
+    background-color: rgb(226, 226, 226);
+    background-size: cover;
+
+    cursor: pointer;
+}
+
+.profile_photo::before {
+    position: absolute;
+    content: '+';
+    right: 0;
+    bottom: 0;
+    width: .7em;
+    height: .7em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    font-size: 6em;
+}
+
+.profile_photo input {
+    display: none;
+}
