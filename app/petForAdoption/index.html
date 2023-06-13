@@ -117,12 +117,12 @@
                 return {
                     datos: JSON.parse(window.localStorage.getItem('usuario')),
                     lostPets: [],
-                    baseURL: "http://192.168.1.121:8080"
+                    baseURL: "http://187.223.180.252:8080"
                 }
             },
             methods: {
                 async getLostPets() {
-                    axios.defaults.baseURL = "http://192.168.1.121:8080/api";
+                    axios.defaults.baseURL = "http://187.223.180.252:8080/api";
                     axios.defaults.headers.common["Authorization"] = this.datos.token;
 
                     let {data = []} = await axios({
