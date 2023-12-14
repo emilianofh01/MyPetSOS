@@ -20,6 +20,7 @@
             display: flex;
             width: 100%;
             height: 100%;
+            overflow-y: hidden;
 
             padding-top: 20px;
         }
@@ -90,6 +91,7 @@
             flex: 1;
             display: flex;
             justify-content: center;
+            overflow-y: scroll;
         }
 
         .form {
@@ -104,13 +106,51 @@
             border-radius: 20px;
             border: 25px solid var(--primary-color);
         }
+
+        .vaccine_list {
+            display: flex;
+            flex-direction: column;
+            /* justify-content: center; */
+            align-items: end;
+            gap: 15px;
+        }
+
+        .vaccine {
+            position: relative;
+            width: 90%;
+            font-size: 1.8em;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 10px;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .vaccine svg {
+            fill: #ff0101;
+        }
+
+
+        .vaccine::before {
+            content: "";
+            position: absolute;
+            width: calc(10% - 40px);
+            height: 2px;
+            right: calc(100% + 10px);
+
+            background-color: var(--primary-color);
+        }
     </style>
 </head>
 
 <body>
     <div id="app" v-cloak>
 
-        <mypetsos-wrapper title="Reportar mascota" route="lostPets">
+        <mypetsos-wrapper title="Adopciones" route="petForAdoption">
             <form class="lostpet-form" @submit="submitLostPetInfo">
                 <div class="pet_preview_container">
                     <label class="image_dog">
@@ -133,7 +173,7 @@
 
                         <div class="input_text">
                             <label for="sex">Sexo</label>
-                            <select :disabled="!editable"  name="sex" id="sex">
+                            <select :disabled="!editable" name="sex" id="sex">
                                 <option value="" selected disabled>Seleccione una opcion</option>
                                 <option v-for="sex in sex" :value="sex.id">{{sex.name}}</option>
                             </select>
@@ -147,6 +187,27 @@
 
                             </select>
                         </div>
+                        <div class="input_text">
+                            <label for="petBreed">Vacunas</label>
+                            <select @change="addVaccine" :disabled="!editable" name="vaccines" id="vaccines">
+                                <option value="" selected disabled>Seleccione una vacunas</option>
+                                <option v-for="vaccine in filterVaccines()" :value="vaccine.id">{{vaccine.nombre}}
+                                </option>
+                            </select>
+                            <div class="vaccine_list">
+                                <div :style="`${this.datos.role_id != 1 ? 'opacity: 0.5' : ''}`" class="vaccine"
+                                    v-for="(vaccine,index) in selectedVaccines">
+                                    <p>{{vaccine.nombre}}</p>
+                                    <svg @click="deleteSelectedVaccines" :data-id="vaccine.id" v-if="datos.role_id == 1"
+                                        xmlns="http://www.w3.org/2000/svg" height="1em"
+                                        viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+                                        <path
+                                            d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                        </div>
 
                         <div class="input_text">
                             <label for="size">Tamaño</label>
@@ -156,8 +217,8 @@
 
                         <div class="input_text">
                             <label for="">Edad</label>
-                            <input :disabled="!editable" min="0" autocomplete="no" placeholder="Ingrese la edad" type="number"
-                                name="age" id="age" required>
+                            <input :disabled="!editable" min="0" autocomplete="no" placeholder="Ingrese la edad"
+                                type="number" name="age" id="age" required>
                         </div>
 
                         <div class="input_text">
@@ -189,6 +250,8 @@
                     baseURL: "http://187.223.180.252:8080",
                     sex: [],
                     petBreed: [],
+                    vaccines: [],
+                    selectedVaccines: [],
                     files: [],
 
                     editable: true,
@@ -205,7 +268,15 @@
                         preview.style.backgroundImage = `url(${URL.createObjectURL(files)})`;
                     }
                 },
-
+                deleteSelectedVaccines(event) {
+                    this.selectedVaccines = this.selectedVaccines.filter(e => e.id != event.currentTarget.dataset.id)
+                    event.target.value = ""
+                },
+                addVaccine(event) {
+                    console.log(this.vaccines.filter(e => e.id == event.target.value)[0]);
+                    this.selectedVaccines.push(this.vaccines.filter(e => e.id == event.target.value)[0])
+                    event.target.value = ""
+                },
                 async getSexInfo() {
                     let { data: res = [] } = await axios({
                         method: "GET",
@@ -222,6 +293,21 @@
 
                     this.sex = res
                 },
+                async getVaccines() {
+                    let { data: res = [] } = await axios({
+                        method: "GET",
+                        url: "/Vaccines"
+                    })
+
+                    this.vaccines = res
+                    // console.log(this.vaccines);
+                },
+
+                filterVaccines() {
+                    let vaccines = [];
+                    console.log(this.vaccines.filter(e => !this.vaccinesToArray().includes(e.id)));
+                    return this.vaccines.filter(e => !this.vaccinesToArray().includes(e.id));
+                },
 
                 async checkLostPetInfo() {
                     let query = window.location.search;
@@ -232,13 +318,12 @@
                     if (pet) {
                         let { data: res = [] } = await axios({
                             method: "GET",
-                            url: `/lostPets/${pet}`
+                            url: `/petForAdoption/${pet}`
                         })
 
-                        console.log(res);
-                        console.log(this.datos.curp)
+                        // console.log(res);
 
-                        if (res.user.curp != this.datos.curp && this.datos.role_id != 1) {
+                        if (this.datos.role_id != 1) {
                             this.editable = false;
                         }
 
@@ -251,6 +336,7 @@
                         let size = document.getElementById("size");
                         let age = document.getElementById("age");
                         let description = document.getElementById("descripcion");
+                        let vaccines = document.getElementById("vaccines");
 
                         preview.style.backgroundImage = `url(${this.baseURL}${res.imagePath})`;
                         name.value = res.name;
@@ -258,8 +344,17 @@
                         petBreed.value = res.petBreed.id;
                         size.value = res.size;
                         age.value = res.age;
+
+                        this.selectedVaccines = res.vaccines;
+                        console.log(this.selectedVaccines);
+
                         description.value = res.description;
                     }
+                },
+                vaccinesToArray() {
+                    let vaccines = [];
+                    this.selectedVaccines.map(e => vaccines.push(e.id));
+                    return vaccines;
                 },
 
                 async submitLostPetInfo(e) {
@@ -280,20 +375,21 @@
                     data.append("size", size.value);
                     data.append("age", age.value);
                     data.append("description", description.value);
-                    data.append("image", image.files[0])
+                    data.append("image", image.files[0]);
+                    data.append("vaccines", !this.selectedVaccines.length ? 0 : this.vaccinesToArray().join(","))
 
                     submit_container.classList.add("loading");
                     e.submitter.disabled = true
                     let res = await axios({
-                        method: this.pet ? "put" : "post",
-                        url: this.pet ? `/lostPets/${this.pet.id}` : "/lostPets",
+                        method: "put",
+                        url: `/UpdatePetForAdoption/${this.pet.id}`,
                         data: data
                     }).then(({ data }) => {
                         Swal.fire({
                             icon: 'success',
                             title: "Publicación de la mascota añadida",
                             showConfirmButton: true
-                        }).then(() => window.location.href = "../lostpets")
+                        }).then(() => window.location.href = "../petForAdoption")
                     })
                         .catch((err) => {
                             console.log(err);
@@ -332,6 +428,9 @@
                 await this.getSexInfo();
                 await this.getPetBreedInfo();
                 await this.checkLostPetInfo();
+                await this.getVaccines()
+
+                this.vaccinesToArray()
 
                 wrapper.loading = false;
             }

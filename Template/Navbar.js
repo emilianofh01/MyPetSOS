@@ -50,6 +50,7 @@ class Navbar extends LitElement {
         position: relative;
         aspect-ratio: 1/1;
         border-radius: 50%;
+        cursor: pointer;
         border: 2px solid var(--primary-color);
         background-image: url(../../src/img/corgi.jpg);
         background-size: cover;
@@ -70,12 +71,11 @@ class Navbar extends LitElement {
       }
 
       .profile_container div::after {
-        position: absolute;
         content: "";
+        position: absolute;
         width: 65%;
         height: 65%;
         border-radius: 50%;
-
         background-color: #f55d73;
       }
     `,
@@ -85,6 +85,31 @@ class Navbar extends LitElement {
     data: { type: Object },
     route: { type: String },
   };
+
+  logOut() {
+    Swal.fire({
+      title: "¿Deseas cerrar sesión?",
+      text: "Recuerda que puedes volver cuando quieras :)",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Si, deseo cerrar sesión",
+      cancelButtonText: "No"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          icon: 'success',
+          title: '¡Hasta luego!',
+          showConfirmButton: false,
+          timer: 1500
+        }).then(() => {
+          window.localStorage.clear();
+          window.location.href = "../../"
+        })
+      }
+    });
+  }
 
   render() {
     console.log(window.location.hostname);
@@ -144,7 +169,9 @@ class Navbar extends LitElement {
                 d="M269.4 2.9C265.2 1 260.7 0 256 0s-9.2 1-13.4 2.9L54.3 82.8c-22 9.3-38.4 31-38.3 57.2c.5 99.2 41.3 280.7 213.6 363.2c16.7 8 36.1 8 52.8 0C454.7 420.7 495.5 239.2 496 140c.1-26.2-16.3-47.9-38.3-57.2L269.4 2.9zM160.9 286.2c4.8 1.2 9.9 1.8 15.1 1.8c35.3 0 64-28.7 64-64V160h44.2c12.1 0 23.2 6.8 28.6 17.7L320 192h64c8.8 0 16 7.2 16 16v32c0 44.2-35.8 80-80 80H272v50.7c0 7.3-5.9 13.3-13.3 13.3c-1.8 0-3.6-.4-5.2-1.1l-98.7-42.3c-6.6-2.8-10.8-9.3-10.8-16.4c0-2.8 .6-5.5 1.9-8l15-30zM160 160h40 8v32 32c0 17.7-14.3 32-32 32s-32-14.3-32-32V176c0-8.8 7.2-16 16-16zm128 48a16 16 0 1 0 -32 0 16 16 0 1 0 32 0z"
               /></svg
           ></a>
-          <a class=${this.route == "petForAdoption" ? "active" : ""} href="../petForAdoption"
+          <a
+            class=${this.route == "petForAdoption" ? "active" : ""}
+            href="../petForAdoption"
             ><svg
               viewBox="0 0 755 671"
               fill="none"
@@ -162,7 +189,7 @@ class Navbar extends LitElement {
           </a>
           ${this.data.role_id == 1
             ? html`
-                <a class=${this.route == "stats" ? "active" : ""} href="#"
+                <a class=${this.route == "statistics" ? "active" : ""} href="../statistics"
                   ><svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 448 512"
@@ -175,11 +202,10 @@ class Navbar extends LitElement {
               `
             : ""}
 
-          <a class=${this.route == "veterinary" ? "active" : ""} href="../veterinary"
-            ><svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 512 512"
-            >
+          <a
+            class=${this.route == "veterinary" ? "active" : ""}
+            href="../veterinary"
+            ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
               <!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
               <path
                 d="M228.3 469.1L47.6 300.4c-4.2-3.9-8.2-8.1-11.9-12.4h87c22.6 0 43-13.6 51.7-34.5l10.5-25.2 49.3 109.5c3.8 8.5 12.1 14 21.4 14.1s17.8-5 22-13.3L320 253.7l1.7 3.4c9.5 19 28.9 31 50.1 31H476.3c-3.7 4.3-7.7 8.5-11.9 12.4L283.7 469.1c-7.5 7-17.4 10.9-27.7 10.9s-20.2-3.9-27.7-10.9zM503.7 240h-132c-3 0-5.8-1.7-7.2-4.4l-23.2-46.3c-4.1-8.1-12.4-13.3-21.5-13.3s-17.4 5.1-21.5 13.3l-41.4 82.8L205.9 158.2c-3.9-8.7-12.7-14.3-22.2-14.1s-18.1 5.9-21.8 14.8l-31.8 76.3c-1.2 3-4.2 4.9-7.4 4.9H16c-2.6 0-5 .4-7.3 1.1C3 225.2 0 208.2 0 190.9v-5.8c0-69.9 50.5-129.5 119.4-141C165 36.5 211.4 51.4 244 84l12 12 12-12c32.6-32.6 79-47.5 124.6-39.9C461.5 55.6 512 115.2 512 185.1v5.8c0 16.9-2.8 33.5-8.3 49.1z"
@@ -192,6 +218,7 @@ class Navbar extends LitElement {
             ? `background-image: url(http://${window.location.hostname}:8080${this.data.image})`
             : ""}
           class="profile_container"
+          @click=${this.logOut}
         >
           <div></div>
         </div>

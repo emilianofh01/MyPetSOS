@@ -78,6 +78,7 @@ class Wrapper extends LitElement {
 
   constructor() {
     super();
+    if(!window.localStorage.getItem("usuario")) window.location.href = "../../";
     this.data = JSON.parse(window.localStorage.getItem("usuario"));
 
     window.doPetition = this.doPetition;

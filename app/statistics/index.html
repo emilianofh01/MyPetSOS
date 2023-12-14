@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
@@ -7,6 +7,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SOS MyPet</title>
     <link rel="stylesheet" href="../../src/CSS/base.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../src/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../src/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../src/favicon/favicon-16x16.png">
+    <link rel="manifest" href="../../src/favicon/site.webmanifest">
+    <link rel="mask-icon" href="../../src/favicon/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
     <style>
         /* CONTENT */
         .middle_graphics>* {
@@ -77,7 +84,7 @@
 <body>
     <div id="app">
 
-        <mypetsos-wrapper title="Estadísticas">
+        <mypetsos-wrapper title="Estadísticas" route="statistics">
             <div class="counter_container">
                 <div class="pet_adoption">
                     <p>Número de animales en el albergue</p>
@@ -106,14 +113,15 @@
     <script src="../../src/JS/axios.min.js"></script>
     <script src="../../src/JS/chart.js"></script>
     <script src="../../src/JS/Vue.js"></script>
+    <script src="../../src/JS/sweetalert.js"></script>
     <script type="module" src="../../Template/wrapper.js"></script>
     <script>
-        axios.defaults.baseURL = 'http://187.223.180.252:8080';
         const { createApp } = Vue
 
         createApp({
             data() {
                 return {
+                    datos: JSON.parse(window.localStorage.getItem('usuario')),
                     petAdoption: 0,
                     pet_noAdoption: 0,
                     PetForAdoption: 0,
@@ -123,10 +131,7 @@
                 async getPetForAdoption() {
                     return await axios({
                         method: "GET",
-                        url: "/api/PetForAdoption",
-                        headers: {
-                            Authorization: "Ztq55izYTy5wYvCf1qlyfTT9DYJpfp4Y2v0KwIEke2w="
-                        }
+                        url: "/PetForAdoption"
                     })
 
                 },
@@ -257,8 +262,14 @@
                     });
                 },
             },
-            mounted() {
-                this.getVaccines();
+            async mounted() {
+                axios.defaults.baseURL = "http://187.223.180.252:8080/api";
+                axios.defaults.headers.common["Authorization"] = this.datos.token;
+
+                let wrapper = document.querySelector("mypetsos-wrapper");
+                await this.getVaccines();
+
+                wrapper.loading = false;
             }
         }).mount('#app')
 
